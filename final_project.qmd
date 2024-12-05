@@ -1,0 +1,8 @@
+---
+title: "Using an Interactions Model to Analyze the Relationship between Deep Sea Corals, Latitude, and Ocean Depth"
+author: "Bailey Jørgensen"
+format: html
+editor: visual
+---
+
+
