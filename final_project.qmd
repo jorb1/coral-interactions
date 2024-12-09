@@ -5,4 +5,69 @@ format: html
 editor: visual
 ---
 
+Overview
+Note: The numbers below only reflect published records. Additional records may be retained by the Program for further review.
+
+Number of records: 30,850
+Number of coral records: 24,768
+Number of sponge records: 6,082
+Records with images: 245
+Record type(s): specimen, still image, video observation
+Minimum depth (meters): 1
+Maximum depth (meters): 6,369
+Number of records flagged as <50 meters depth: 1,763
+Time frame: -999 to 2022
+Data Set Description: This is a subset of the Deep Sea Coral Research and Technology Program’s National Database. The data set contains museum records of deepwater coral and sponge specimens in the Smithsonian Institution, National Museum of Natural History, Invertebrate Zoology Collection. Changes to the original dataset may have been made to conform to the National Database Schema and for quality control purposes. The collection is world-wide in scope, and represents the largest U.S. museum collection of these taxa, including many type specimens. Further information can be found at: http://invertebrates.si.edu/collections.htm
+
+
+```{r}
+#| eval: true
+#| echo: false
+# Load libraries
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+# Read in data
+corals <- read_csv(here("data", "deep_sea_corals_1843_c601_9be4.csv"))
+```
+
+```{r}
+# Explore data, in order to filter by species and region
+head(corals)
+```
+```{r}
+# Filter data to only include columns I want
+corals <- corals %>% 
+  clean_names(case = "snake") %>% # Change column names to snake_case
+  select(scientific_name, phylum, genus, species, individual_count, latitude, longitude, depth_in_meters, country) %>% # Choose columns I want
+  filter(phylum %in% c("Cnidaria")) # Filter to exclude sponges
+  
+corals
+```
+```{r}
+# How many unique scientific names are there?
+n_distinct(corals$scientific_name)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+## Citations
+
+Smithsonian Institution, National Museum of Natural History. Observation date range: 1860 to 2022. Coral or sponge occurrence observations submitted to the NOAA National Database for Deep Sea Corals and Sponges (www.deepseacoraldata.noaa.gov). DSCRTP Dataset ID: NMNH_IZ. Database version: 20241022-1.
+
+
 
