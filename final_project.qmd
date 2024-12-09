@@ -31,9 +31,16 @@ Data Set Description: This is a subset of the Deep Sea Coral Research and Techno
 #| eval: true
 #| echo: false
 # Load libraries
+rm(list = ls())
 library(tidyverse)
 library(here)
 library(janitor)
+library(sf)
+library(tmap)
+library(terra)
+library(stars)
+library(spData)
+library(spDataLarge)
 ```
 
 ```{r}
@@ -47,20 +54,59 @@ corals <- read_csv(here("data", "deep_sea_corals_1843_c601_9be4.csv"))
 # Explore data, in order to filter by species and region
 head(corals)
 ```
+
 ```{r}
 # Filter data to only include columns I want
 corals <- corals %>% 
   clean_names(case = "snake") %>% # Change column names to snake_case
   select(scientific_name, phylum, genus, species, individual_count, latitude, longitude, depth_in_meters, country) %>% # Choose columns I want
-  filter(phylum %in% c("Cnidaria")) # Filter to exclude sponges and NA row
+  filter(phylum %in% c("Cnidaria")) %>% # Filter to exclude sponges and NA row
+  sf::st_as_sf(coords = c("longitude", "latitude"),
+               crs = st_crs(4326)) %>% 
+              filter(st_is_valid(.))
   
 corals
 ```
+
 ```{r}
 # How many unique scientific names are there?
 n_distinct(corals$scientific_name)
 ```
 
+```{r}
+unique(corals$country)
+```
+
+```{r}
+
+```
+
+
+```{r}
+world <- spData::world
+
+tm_shape(world) +
+  tm_fill(col = "continent",
+          palette = c("slategray", "snow3", "slategray2", "slategray3", "slategray4", "lightslategrey", "lightsteelblue4", "snow4"),
+          title = "Continents") +
+  tm_shape(corals) +
+  tm_dots(col = "phylum",
+          palette = "pink2",
+          size = 0.05,
+          border.col = "black",
+          title = "Data Point") +
+  # tm_compass(type = "4star",
+  #            size = .05,
+  #            position = c("left", "top")) +
+  tm_layout(main.title = "Global Coral Observations",
+            title.position = c("center", "top"),
+            title.snap.to.legend = FALSE,
+            #frame = TRUE, 
+            #legend.frame = TRUE,
+            legend.outside = TRUE)
+```
+
+From this global map, we can see the huge volume to coral observations present in our dataset. In order to get a more focus in my model, I will filter the datset to a specific continent, and run the analysis on that. It could be interesting to, in the future, run the same analysis on each continent, and then cross-compare them. This would reveal interesting insights about different continents and species, but I also think it could be an interesting view into how collecitng bias might affect the results of such an analusis, since we can see that some continents contain more sample points than others. INSERT DATA BIAS SOURCES FROM ETHICS CLASS IN HERE
 
 
 
