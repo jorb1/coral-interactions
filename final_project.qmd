@@ -1,8 +1,15 @@
 ---
 title: "Using an Interactions Model to Analyze the Relationship between Deep Sea Corals, Latitude, and Ocean Depth"
 author: "Bailey Jørgensen"
-format: html
-editor: visual
+execute:
+  warning: false
+  message: false
+format:
+  html:
+    code-fold: true
+    toc: true
+editor_options: 
+  chunk_output_type: console
 ---
 
 Overview
@@ -45,7 +52,7 @@ head(corals)
 corals <- corals %>% 
   clean_names(case = "snake") %>% # Change column names to snake_case
   select(scientific_name, phylum, genus, species, individual_count, latitude, longitude, depth_in_meters, country) %>% # Choose columns I want
-  filter(phylum %in% c("Cnidaria")) # Filter to exclude sponges
+  filter(phylum %in% c("Cnidaria")) # Filter to exclude sponges and NA row
   
 corals
 ```
