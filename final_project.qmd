@@ -12,26 +12,15 @@ editor_options:
   chunk_output_type: console
 ---
 
-Overview
-Note: The numbers below only reflect published records. Additional records may be retained by the Program for further review.
+Overview Note: The numbers below only reflect published records. Additional records may be retained by the Program for further review.
 
-Number of records: 30,850
-Number of coral records: 24,768
-Number of sponge records: 6,082
-Records with images: 245
-Record type(s): specimen, still image, video observation
-Minimum depth (meters): 1
-Maximum depth (meters): 6,369
-Number of records flagged as <50 meters depth: 1,763
-Time frame: -999 to 2022
-Data Set Description: This is a subset of the Deep Sea Coral Research and Technology Program’s National Database. The data set contains museum records of deepwater coral and sponge specimens in the Smithsonian Institution, National Museum of Natural History, Invertebrate Zoology Collection. Changes to the original dataset may have been made to conform to the National Database Schema and for quality control purposes. The collection is world-wide in scope, and represents the largest U.S. museum collection of these taxa, including many type specimens. Further information can be found at: http://invertebrates.si.edu/collections.htm
-
+Number of records: 30,850 Number of coral records: 24,768 Number of sponge records: 6,082 Records with images: 245 Record type(s): specimen, still image, video observation Minimum depth (meters): 1 Maximum depth (meters): 6,369 Number of records flagged as \<50 meters depth: 1,763 Time frame: -999 to 2022 Data Set Description: This is a subset of the Deep Sea Coral Research and Technology Program’s National Database. The data set contains museum records of deepwater coral and sponge specimens in the Smithsonian Institution, National Museum of Natural History, Invertebrate Zoology Collection. Changes to the original dataset may have been made to conform to the National Database Schema and for quality control purposes. The collection is world-wide in scope, and represents the largest U.S. museum collection of these taxa, including many type specimens. Further information can be found at: http://invertebrates.si.edu/collections.htm
 
 ```{r}
 #| eval: true
 #| echo: false
 # Load libraries
-rm(list = ls())
+#rm(list = ls())
 library(tidyverse)
 library(here)
 library(janitor)
@@ -41,7 +30,15 @@ library(terra)
 library(stars)
 library(spData)
 library(spDataLarge)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(rnaturalearthhires)
+library(emmeans)
+library(knitr)
+library(kableExtra)
 ```
+
+## Data
 
 ```{r}
 #| eval: true
@@ -52,7 +49,7 @@ corals <- read_csv(here("data", "deep_sea_corals_1843_c601_9be4.csv"))
 
 ```{r}
 # Explore data, in order to filter by species and region
-head(corals)
+#head(corals)
 ```
 
 ```{r}
@@ -60,27 +57,28 @@ head(corals)
 corals <- corals %>% 
   clean_names(case = "snake") %>% # Change column names to snake_case
   select(scientific_name, phylum, genus, species, individual_count, latitude, longitude, depth_in_meters, country) %>% # Choose columns I want
-  filter(phylum %in% c("Cnidaria")) %>% # Filter to exclude sponges and NA row
+  filter(phylum %in% c("Cnidaria")) # Filter to exclude sponges and NA row
+
+```
+
+```{r}
+corals_transformed <- corals %>% 
   sf::st_as_sf(coords = c("longitude", "latitude"),
                crs = st_crs(4326)) %>% 
               filter(st_is_valid(.))
-  
-corals
+
 ```
 
 ```{r}
-# How many unique scientific names are there?
-n_distinct(corals$scientific_name)
+# Create a table using kable and format it with kableExtra
+kable(head(corals), format = "html", caption = "Preview of Filtered Global Coral Data") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
-```{r}
-unique(corals$country)
-```
 
-```{r}
+## Explore
 
-```
-
+### Visualize
 
 ```{r}
 world <- spData::world
@@ -89,7 +87,7 @@ tm_shape(world) +
   tm_fill(col = "continent",
           palette = c("slategray", "snow3", "slategray2", "slategray3", "slategray4", "lightslategrey", "lightsteelblue4", "snow4"),
           title = "Continents") +
-  tm_shape(corals) +
+  tm_shape(corals_transformed) +
   tm_dots(col = "phylum",
           palette = "pink2",
           size = 0.05,
@@ -108,19 +106,134 @@ tm_shape(world) +
 
 From this global map, we can see the huge volume to coral observations present in our dataset. In order to get a more focus in my model, I will filter the datset to a specific continent, and run the analysis on that. It could be interesting to, in the future, run the same analysis on each continent, and then cross-compare them. This would reveal interesting insights about different continents and species, but I also think it could be an interesting view into how collecitng bias might affect the results of such an analusis, since we can see that some continents contain more sample points than others. INSERT DATA BIAS SOURCES FROM ETHICS CLASS IN HERE
 
+I WILL FILTER MY DATA FRAME TO THE PHILIPPINES. GIVE PHOTOS AND FACTS ABOUT CORALS IN THAT AREA TO JUSTIFY LOCATION.
+
+```{r}
+phil_coral <- corals %>% 
+  filter(country %in% "Philippines") %>% 
+  mutate(
+    latitude = as.numeric(latitude),
+    longitude = as.numeric(longitude),
+    depth_in_meters = as.numeric(depth_in_meters),
+    latitude_rounded = round(latitude, 1)
+  ) %>% 
+  add_count(latitude_rounded, name = "obs_count")
+
+# Transformed dataset for mapping
+phil_coral_transformed <- corals_transformed %>% 
+  filter(country %in% "Philippines")
+
+```
+
+```{r}
+# Create a table using kable and format it with kableExtra
+kable(head(phil_coral), format = "html", caption = "Preview of Filtered Philippines Coral Data") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+```{r}
+# Get data for base map of Philippines
+ph <- ne_countries(scale = 10, country = "Philippines", returnclass = "sf")
+
+luzon <- ph %>%
+  st_crop(
+    xmin = st_bbox(ph)$xmin %>% as.numeric(),
+    xmax = st_bbox(ph)$xmax %>% as.numeric(),
+    ymin = 13.5,
+    ymax = 18.5
+  ) %>%
+  st_transform(25391)
+```
+
+```{r}
+tm_shape(ph) +
+  tm_polygons(col = "name",
+          palette = c("slategray", "snow3", "slategray2", "slategray3", "slategray4", "lightslategrey", "lightsteelblue4", "snow4"),
+          title = "Philippines") +
+  tm_shape(phil_coral_transformed) +
+  tm_dots(col = "phylum",
+          palette = "pink2",
+          size = 0.1,
+          border.col = "black",
+          title = "Data Point") +
+   tm_compass(type = "8star",
+              size = 2,
+              position = c("left", "top")) +
+  tm_layout(main.title = "Coral Observations \nin the Philippines",
+            title.position = c("center", "top"),
+            title.snap.to.legend = FALSE,
+            #frame = TRUE, 
+            #legend.frame = TRUE,
+            legend.outside = TRUE)
+```
+
+### Summarize
+
+Data we are interested in.... make some plots
+
+```{r}
+# Make a plot
+ggplot() +
+ geom_line(data = phil_coral,
+            aes(x = latitude_rounded,
+                y = obs_count),
+           color = "pink2",
+           size = 1) +
+  labs(x = "Latitude",
+       y = "Number of Deep Sea Corals Observed",
+       title = "Deep Sea Corals at Latitude") +
+  theme_bw()
+```
+
+```{r}
+# Make a plot
+ggplot() +
+ geom_line(data = phil_coral,
+            aes(x = latitude_rounded,
+                y = depth_in_meters),
+           color = "slategray",
+           size = 1) +
+  labs(x = "Latitude",
+       y = "Depth in Meters",
+       title = "Depth Fluctuations in the Philippines") +
+  scale_y_reverse() +
+  theme_bw()
+```
 
 
+### Hypothesize
+
+Null: There is no relationship Alternate: There IS a relationship
+
+## Analysis
+
+Method: Interactions model
+```{r}
+max(phil_coral$depth_in_meters)
+```
 
 
+```{r}
+# Create an interactions model
+interactions <- lm(obs_count ~ latitude_rounded + depth_in_meters + latitude_rounded:depth_in_meters,
+                   data = phil_coral)
+summary(interactions)
+```
 
+```{r}
+# Simple slopes of depth by latitude
+emtrends(interactions, specs = c("latitude_rounded"), var = "depth_in_meters")
+```
 
+```{r}
+# P-values of slopes of depth by latitude
+test(emtrends(interactions, specs = c("latitude_rounded"), var = "depth_in_meters"))
+```
 
-
-
+```{r}
+emmip(interactions, latitude_rounded ~ depth_in_meters, at=list(depth_in_meters=18:2050), CIs = FALSE)
+```
 
 ## Citations
 
 Smithsonian Institution, National Museum of Natural History. Observation date range: 1860 to 2022. Coral or sponge occurrence observations submitted to the NOAA National Database for Deep Sea Corals and Sponges (www.deepseacoraldata.noaa.gov). DSCRTP Dataset ID: NMNH_IZ. Database version: 20241022-1.
-
-
-
