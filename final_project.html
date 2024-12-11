@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Bailey Jørgensen">
+<meta name="author" content="BAILEY JØRGENSEN">
 
-<title>Using an Interactions Model to Analyze the Relationship between Deep Sea Corals, Latitude, and Ocean Depth</title>
+<title>USING AN INTERACTIONS MODEL TO ANALYZE THE RELATIONSHIP BETWEEN DEEP SEA CORALS, LATITUDE, AND OCEAN DEPTH</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -84,7 +84,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#data" id="toc-data" class="nav-link active" data-scroll-target="#data">Data</a></li>
+  <li><a href="#the-context" id="toc-the-context" class="nav-link active" data-scroll-target="#the-context">THE CONTEXT:</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">THE DATA:</a></li>
   <li><a href="#explore" id="toc-explore" class="nav-link" data-scroll-target="#explore">Explore</a>
   <ul class="collapse">
   <li><a href="#visualize" id="toc-visualize" class="nav-link" data-scroll-target="#visualize">Visualize</a></li>
@@ -100,7 +101,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Using an Interactions Model to Analyze the Relationship between Deep Sea Corals, Latitude, and Ocean Depth</h1>
+<h1 class="title">USING AN INTERACTIONS MODEL TO ANALYZE THE RELATIONSHIP BETWEEN DEEP SEA CORALS, LATITUDE, AND OCEAN DEPTH</h1>
 </div>
 
 
@@ -110,7 +111,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Bailey Jørgensen </p>
+             <p>BAILEY JØRGENSEN </p>
           </div>
   </div>
     
@@ -123,35 +124,145 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Overview Note: The numbers below only reflect published records. Additional records may be retained by the Program for further review.</p>
+<div>
+
+</div>
+<div class="quarto-layout-panel" data-layout-ncol="3">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="https://www.whoi.edu/wp-content/uploads/2019/02/deepseacoral_en1_198293-300x193.jpeg" class="img-fluid" width="300"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="https://www.whoi.edu/wp-content/uploads/2019/02/4_144157_198196-300x193.jpeg" class="img-fluid" width="300"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="https://www.whoi.edu/wp-content/uploads/2011/05/top_144513.jpg" class="img-fluid" width="300"></p>
+</div>
+</div>
+</div>
+<section id="the-context" class="level2">
+<h2 class="anchored" data-anchor-id="the-context">THE CONTEXT:</h2>
+<p>It is estimated that two-thirds of all known coral species can be classified as “deep-sea corals”. These corals exhibit a diversity similar to those of their shallow-water relatives, but they do not form symbiotic relationships with algae, do not obtain energy from sunlight (instead feeding from microorganisms in the water), and are much more resilient to cold temperatures.</p>
+<p>Also similar to their shallow water counterparts, deep sea corals are hosts to many other forms of biodiversity. They are also extremely slow growing, and as a result, slow to recover from ecological or anthropogenic disturbance[1].</p>
+<p>This analysis will seek to more deeply understand the environments in which deep sea corals are more likely to appear.</p>
+</section>
+<section id="the-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-data">THE DATA:</h2>
 <p>Number of records: 30,850 Number of coral records: 24,768 Number of sponge records: 6,082 Records with images: 245 Record type(s): specimen, still image, video observation Minimum depth (meters): 1 Maximum depth (meters): 6,369 Number of records flagged as &lt;50 meters depth: 1,763 Time frame: -999 to 2022 Data Set Description: This is a subset of the Deep Sea Coral Research and Technology Program’s National Database. The data set contains museum records of deepwater coral and sponge specimens in the Smithsonian Institution, National Museum of Natural History, Invertebrate Zoology Collection. Changes to the original dataset may have been made to conform to the National Database Schema and for quality control purposes. The collection is world-wide in scope, and represents the largest U.S. museum collection of these taxa, including many type specimens. Further information can be found at: http://invertebrates.si.edu/collections.htm</p>
-<section id="data" class="level2">
-<h2 class="anchored" data-anchor-id="data">Data</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Explore data, in order to filter by species and region</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#head(corals)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data to only include columns I want</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>corals <span class="ot">&lt;-</span> corals <span class="sc">%&gt;%</span> </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>(<span class="at">case =</span> <span class="st">"snake"</span>) <span class="sc">%&gt;%</span> <span class="co"># Change column names to snake_case</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(scientific_name, phylum, genus, species, individual_count, latitude, longitude, depth_in_meters, country) <span class="sc">%&gt;%</span> <span class="co"># Choose columns I want</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(phylum <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Cnidaria"</span>)) <span class="co"># Filter to exclude sponges and NA row</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data to only include columns I want</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>corals <span class="ot">&lt;-</span> corals <span class="sc">%&gt;%</span> </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>(<span class="at">case =</span> <span class="st">"snake"</span>) <span class="sc">%&gt;%</span> <span class="co"># Change column names to snake_case</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(scientific_name, phylum, genus, species, individual_count, latitude, longitude, depth_in_meters, country) <span class="sc">%&gt;%</span> <span class="co"># Choose columns I want</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(phylum <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Cnidaria"</span>)) <span class="co"># Filter to exclude sponges and NA row</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>corals_transformed <span class="ot">&lt;-</span> corals <span class="sc">%&gt;%</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitude"</span>, <span class="st">"latitude"</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">crs =</span> <span class="fu">st_crs</span>(<span class="dv">4326</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">filter</span>(<span class="fu">st_is_valid</span>(.))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>corals_transformed <span class="ot">&lt;-</span> corals <span class="sc">%&gt;%</span> </span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitude"</span>, <span class="st">"latitude"</span>),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">crs =</span> <span class="fu">st_crs</span>(<span class="dv">4326</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">filter</span>(<span class="fu">st_is_valid</span>(.))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a table using kable and format it with kableExtra</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(corals), <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">caption =</span> <span class="st">"Preview of Filtered Global Coral Data"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small" data-quarto-postprocess="true">
+<caption>Preview of Filtered Global Coral Data</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">scientific_name</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">phylum</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">genus</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">species</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">individual_count</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">latitude</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">longitude</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">depth_in_meters</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">country</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Pourtalosmilia conferta</td>
+<td style="text-align: left;">Cnidaria</td>
+<td style="text-align: left;">Pourtalosmilia</td>
+<td style="text-align: left;">conferta</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">34.95839</td>
+<td style="text-align: left;">-75.32464</td>
+<td style="text-align: left;">146</td>
+<td style="text-align: left;">USA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Pourtalosmilia conferta</td>
+<td style="text-align: left;">Cnidaria</td>
+<td style="text-align: left;">Pourtalosmilia</td>
+<td style="text-align: left;">conferta</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">34.95839</td>
+<td style="text-align: left;">-75.32464</td>
+<td style="text-align: left;">146</td>
+<td style="text-align: left;">USA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Pourtalosmilia conferta</td>
+<td style="text-align: left;">Cnidaria</td>
+<td style="text-align: left;">Pourtalosmilia</td>
+<td style="text-align: left;">conferta</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">29.28357</td>
+<td style="text-align: left;">-88.26665</td>
+<td style="text-align: left;">84</td>
+<td style="text-align: left;">USA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Pourtalosmilia conferta</td>
+<td style="text-align: left;">Cnidaria</td>
+<td style="text-align: left;">Pourtalosmilia</td>
+<td style="text-align: left;">conferta</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">24.48375</td>
+<td style="text-align: left;">-80.88314</td>
+<td style="text-align: left;">191</td>
+<td style="text-align: left;">USA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Desmophyllum pertusum</td>
+<td style="text-align: left;">Cnidaria</td>
+<td style="text-align: left;">Desmophyllum</td>
+<td style="text-align: left;">pertusum</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">30.96684</td>
+<td style="text-align: left;">-79.69976</td>
+<td style="text-align: left;">396</td>
+<td style="text-align: left;">USA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Desmophyllum pertusum</td>
+<td style="text-align: left;">Cnidaria</td>
+<td style="text-align: left;">Desmophyllum</td>
+<td style="text-align: left;">pertusum</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">27.98361</td>
+<td style="text-align: left;">-79.3331</td>
+<td style="text-align: left;">577</td>
+<td style="text-align: left;">Bahamas</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
 </div>
 </section>
 <section id="explore" class="level2">
@@ -509,7 +620,8 @@ Confidence level used: 0.95 </code></pre>
 </section>
 <section id="citations" class="level2">
 <h2 class="anchored" data-anchor-id="citations">Citations</h2>
-<p>Smithsonian Institution, National Museum of Natural History. Observation date range: 1860 to 2022. Coral or sponge occurrence observations submitted to the NOAA National Database for Deep Sea Corals and Sponges (www.deepseacoraldata.noaa.gov). DSCRTP Dataset ID: NMNH_IZ. Database version: 20241022-1.</p>
+<p>[1]Roberts, S. and Hirshfield, M. (2004), Deep-sea corals: out of sight, but no longer out of mind. Frontiers in Ecology and the Environment, 2: 123-130. https://doi.org/10.1890/1540-9295(2004)002[0123:DCOOSB]2.0.CO;2</p>
+<p>[2]Smithsonian Institution, National Museum of Natural History. Observation date range: 1860 to 2022. Coral or sponge occurrence observations submitted to the NOAA National Database for Deep Sea Corals and Sponges (www.deepseacoraldata.noaa.gov). DSCRTP Dataset ID: NMNH_IZ. Database version: 20241022-1.</p>
 </section>
 
 </main>
