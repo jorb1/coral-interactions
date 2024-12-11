@@ -86,9 +86,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#the-context" id="toc-the-context" class="nav-link active" data-scroll-target="#the-context">THE CONTEXT:</a></li>
   <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">THE DATA:</a></li>
-  <li><a href="#explore" id="toc-explore" class="nav-link" data-scroll-target="#explore">Explore</a>
+  <li><a href="#the-exploration" id="toc-the-exploration" class="nav-link" data-scroll-target="#the-exploration">THE EXPLORATION:</a>
   <ul class="collapse">
-  <li><a href="#visualize" id="toc-visualize" class="nav-link" data-scroll-target="#visualize">Visualize</a></li>
+  <li><a href="#visualization" id="toc-visualization" class="nav-link" data-scroll-target="#visualization">VISUALIZATION</a></li>
   <li><a href="#summarize" id="toc-summarize" class="nav-link" data-scroll-target="#summarize">Summarize</a></li>
   <li><a href="#hypothesize" id="toc-hypothesize" class="nav-link" data-scroll-target="#hypothesize">Hypothesize</a></li>
   </ul></li>
@@ -143,12 +143,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="the-context" class="level2">
 <h2 class="anchored" data-anchor-id="the-context">THE CONTEXT:</h2>
 <p>It is estimated that two-thirds of all known coral species can be classified as “deep-sea corals”. These corals exhibit a diversity similar to those of their shallow-water relatives, but they do not form symbiotic relationships with algae, do not obtain energy from sunlight (instead feeding from microorganisms in the water), and are much more resilient to cold temperatures.</p>
-<p>Also similar to their shallow water counterparts, deep sea corals are hosts to many other forms of biodiversity. They are also extremely slow growing, and as a result, slow to recover from ecological or anthropogenic disturbance[1].</p>
+<p>Also similar to their shallow water counterparts, deep sea corals are hosts to many other forms of biodiversity. They are also extremely slow growing, and as a result, slow to recover from ecological or anthropogenic disturbance[2].</p>
 <p>This analysis will seek to more deeply understand the environments in which deep sea corals are more likely to appear.</p>
 </section>
 <section id="the-data" class="level2">
 <h2 class="anchored" data-anchor-id="the-data">THE DATA:</h2>
-<p>Number of records: 30,850 Number of coral records: 24,768 Number of sponge records: 6,082 Records with images: 245 Record type(s): specimen, still image, video observation Minimum depth (meters): 1 Maximum depth (meters): 6,369 Number of records flagged as &lt;50 meters depth: 1,763 Time frame: -999 to 2022 Data Set Description: This is a subset of the Deep Sea Coral Research and Technology Program’s National Database. The data set contains museum records of deepwater coral and sponge specimens in the Smithsonian Institution, National Museum of Natural History, Invertebrate Zoology Collection. Changes to the original dataset may have been made to conform to the National Database Schema and for quality control purposes. The collection is world-wide in scope, and represents the largest U.S. museum collection of these taxa, including many type specimens. Further information can be found at: http://invertebrates.si.edu/collections.htm</p>
+<p>The data used for this analysis comes from NOAA’s Deep Sea Coral Research and Technology Program (DSCRTP), and is housed at the Smithsonian National Museum of Natural History, Invertebrate Zoology Collection. It contains decades worth of data regarding deep sea corals, their taxa, spatial data, and collecting data. It is an open source data set, that is consistently being updated. (See link in the citations section, to take a look for yourself!)[3]</p>
+<p>Here are some details from the dataset:</p>
+<ul>
+<li>Number of records: 30,850</li>
+<li>Number of coral records: 24,768</li>
+<li>Number of sponge records: 6,082</li>
+<li>Records with images: 245</li>
+</ul>
+<p>Obviously, we have a lot of data points to work with here. Let’s begin by loading our libraries and reading in the data!</p>
+<p>The deep sea corals dataset I chose also includes deep sea sponges. Since this analysis wants to focus on corals, I’ll have to filter that data out. In addition, there are several columns on the dataframe that I know won’t be helpful for my analysis (for example, collector data, institution data, or columns that contains a lot of NAs.) In addition to filtering out the sponge data, I will filter out those unwanted columns as well.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -159,6 +168,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(phylum <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Cnidaria"</span>)) <span class="co"># Filter to exclude sponges and NA row</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>I know that in order to properly visualize my data, I’m going to want to make some maps. However, I also want the latitude and longitude data to be easily handled during any linear model calculations, so I decide to make a separate dataset variable, that transforms the lat long data into geometric data that I can easily add to tmaps for visualizations.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -168,6 +178,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">filter</span>(<span class="fu">st_is_valid</span>(.))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>Let’s take a look at the result of our well filtered data! This data cleaning will enable us to run effective and easy to understand data analysis in the next few steps.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -265,10 +276,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="explore" class="level2">
-<h2 class="anchored" data-anchor-id="explore">Explore</h2>
-<section id="visualize" class="level3">
-<h3 class="anchored" data-anchor-id="visualize">Visualize</h3>
+<section id="the-exploration" class="level2">
+<h2 class="anchored" data-anchor-id="the-exploration">THE EXPLORATION:</h2>
+<section id="visualization" class="level3">
+<h3 class="anchored" data-anchor-id="visualization">VISUALIZATION</h3>
+<p>I want to take a look at the whole scale of my data set. To do this, I decide to make a global map.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -297,13 +309,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="final_project_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="final_project_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="1344"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>From this global map, we can see the huge volume to coral observations present in our dataset. In order to get a more focus in my model, I will filter the datset to a specific continent, and run the analysis on that. It could be interesting to, in the future, run the same analysis on each continent, and then cross-compare them. This would reveal interesting insights about different continents and species, but I also think it could be an interesting view into how collecitng bias might affect the results of such an analusis, since we can see that some continents contain more sample points than others. INSERT DATA BIAS SOURCES FROM ETHICS CLASS IN HERE</p>
-<p>I WILL FILTER MY DATA FRAME TO THE PHILIPPINES. GIVE PHOTOS AND FACTS ABOUT CORALS IN THAT AREA TO JUSTIFY LOCATION.</p>
+<p>From this global map, we can see the huge volume to coral observations present in our dataset. In order to get a little more focus in my model, I decide filter the datset to a specific country, and run my analysis on that.</p>
+<p>It could be interesting to, in the future, run the same analysis on each continent, and then cross-compare them. This would reveal interesting insights about different continents and species. Politically, it could also be an interesting view into how collecting bias might affect the results of such an analysis, since we can see that some continents contain more sample points than others. Unfortunately, this could be due to the fact that certain countries and regions are more studied than others, due to data collecting bias in the environmental sector.[1]</p>
+<p>For the purpose of this study, however, I will filter the coral data to the Philippines. The Philippines is an area known for its coral diversity and it’s popularity in the diving community. I am curious to see how DEEP SEA corals are represented in the region, rather than the dive-able shallow coral systems.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -474,7 +487,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="final_project_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="final_project_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="1344"></p>
 </figure>
 </div>
 </div>
@@ -620,8 +633,9 @@ Confidence level used: 0.95 </code></pre>
 </section>
 <section id="citations" class="level2">
 <h2 class="anchored" data-anchor-id="citations">Citations</h2>
-<p>[1]Roberts, S. and Hirshfield, M. (2004), Deep-sea corals: out of sight, but no longer out of mind. Frontiers in Ecology and the Environment, 2: 123-130. https://doi.org/10.1890/1540-9295(2004)002[0123:DCOOSB]2.0.CO;2</p>
-<p>[2]Smithsonian Institution, National Museum of Natural History. Observation date range: 1860 to 2022. Coral or sponge occurrence observations submitted to the NOAA National Database for Deep Sea Corals and Sponges (www.deepseacoraldata.noaa.gov). DSCRTP Dataset ID: NMNH_IZ. Database version: 20241022-1.</p>
+<p>[1]Konno, K., Gibbons, J., Lewis, R. and Pullin, A.S., 2024. Potential types of bias when estimating causal effects in environmental research and how to interpret them. Environmental Evidence, 13(1), p.1. (https://link.springer.com/article/10.1186/s13750-024-00324-7)</p>
+<p>[2]Roberts, S. and Hirshfield, M. (2004), Deep-sea corals: out of sight, but no longer out of mind. Frontiers in Ecology and the Environment, 2: 123-130. https://doi.org/10.1890/1540-9295(2004)002[0123:DCOOSB]2.0.CO;2</p>
+<p>[3]Smithsonian Institution, National Museum of Natural History. Observation date range: 1860 to 2022. Coral or sponge occurrence observations submitted to the NOAA National Database for Deep Sea Corals and Sponges (www.deepseacoraldata.noaa.gov). DSCRTP Dataset ID: NMNH_IZ. Database version: 20241022-1.</p>
 </section>
 
 </main>

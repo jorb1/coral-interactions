@@ -107,7 +107,7 @@ kable(head(corals), format = "html", caption = "Preview of Filtered Global Coral
 
 I want to take a look at the whole scale of my data set. To do this, I decide to make a global map.
 
-```{r}
+```{r, fig.width=14, fig.height=10}
 world <- spData::world
 
 tm_shape(world) +
@@ -133,9 +133,10 @@ tm_shape(world) +
 
 From this global map, we can see the huge volume to coral observations present in our dataset. In order to get a little more focus in my model, I decide filter the datset to a specific country, and run my analysis on that. 
 
-It could be interesting to, in the future, run the same analysis on each continent, and then cross-compare them. This would reveal interesting insights about different continents and species, but I also think it could be an interesting view into how collecting bias might affect the results of such an analysis, since we can see that some continents contain more sample points than others. INSERT DATA BIAS SOURCES FROM ETHICS CLASS IN HERE[1]
+It could be interesting to, in the future, run the same analysis on each continent, and then cross-compare them. This would reveal interesting insights about different continents and species. Politically, it could also be an interesting view into how collecting bias might affect the results of such an analysis, since we can see that some continents contain more sample points than others. Unfortunately, this could be due to the fact that certain countries and regions are more studied than others, due to data collecting bias in the environmental sector.[1]
 
-I WILL FILTER MY DATA FRAME TO THE PHILIPPINES. GIVE PHOTOS AND FACTS ABOUT CORALS IN THAT AREA TO JUSTIFY LOCATION.
+For the purpose of this study, however, I will filter the coral data to the Philippines. The Philippines is an area known for its coral diversity and it's popularity in the diving community. I am curious to see how DEEP SEA corals are represented in the region, rather than the dive-able shallow coral systems. 
+
 
 ```{r}
 phil_coral <- corals %>% 
@@ -174,7 +175,7 @@ luzon <- ph %>%
   st_transform(25391)
 ```
 
-```{r}
+```{r, fig.width=14, fig.height=10}
 tm_shape(ph) +
   tm_polygons(col = "name",
           palette = c("slategray", "snow3", "slategray2", "slategray3", "slategray4", "lightslategrey", "lightsteelblue4", "snow4"),
@@ -229,6 +230,35 @@ ggplot() +
   theme_bw()
 ```
 
+```{r}
+ggplot() +
+  geom_point(data = phil_coral,
+             aes(x = latitude_rounded,
+                 y = depth_in_meters,
+                 color = obs_count)) +
+  scale_color_gradient(low = "black", high = "pink2") +
+  labs(x = "Latitude",
+       y = "Depth in Meters",
+       title = "Colored by # of Observations") +
+  theme_bw()
+
+```
+
+
+```{r}
+ggplot() +
+  geom_point(data = phil_coral,
+             aes(x = latitude_rounded,
+                 y = obs_count,
+                 color = depth_in_meters)) +
+  scale_color_gradient(low = "skyblue", high = "black") +
+  labs(x = "Latitude",
+       y = "Number of Deep Sea Corals Observed",
+       title = "Depth, Latitude, and Observation Count") +
+  theme_bw()
+
+```
+
 
 ### Hypothesize
 
@@ -270,3 +300,5 @@ emmip(interactions, latitude_rounded ~ depth_in_meters, at=list(depth_in_meters=
 [2]Roberts, S. and Hirshfield, M. (2004), Deep-sea corals: out of sight, but no longer out of mind. Frontiers in Ecology and the Environment, 2: 123-130. https://doi.org/10.1890/1540-9295(2004)002[0123:DCOOSB]2.0.CO;2
 
 [3]Smithsonian Institution, National Museum of Natural History. Observation date range: 1860 to 2022. Coral or sponge occurrence observations submitted to the NOAA National Database for Deep Sea Corals and Sponges (www.deepseacoraldata.noaa.gov). DSCRTP Dataset ID: NMNH_IZ. Database version: 20241022-1.
+
+[4] IMAGE CREDITS: Woods Hole Oceanographic Institution. "Deep-sea Corals." Know Your Ocean. Accessed December 10, 2024. https://www.whoi.edu/know-your-ocean/ocean-topics/ocean-life/coral/deep-sea-corals/.
