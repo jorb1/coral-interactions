@@ -32,14 +32,14 @@ This analysis will seek to more deeply understand the environments in which deep
 
 The data used for this analysis comes from NOAA's Deep Sea Coral Research and Technology Program (DSCRTP), and is housed at the Smithsonian National Museum of Natural History, Invertebrate Zoology Collection. It contains decades worth of data regarding deep sea corals, their taxa, spatial data, and collecting data. It is an open source data set, that is consistently being updated. (See link in the citations section, to take a look for yourself!)[3]
 
-Here are some details from the dataset:
+Here are some details from the metadata of the dataset:
 
 - Number of records: 30,850 
 - Number of coral records: 24,768 
 - Number of sponge records: 6,082 
 - Records with images: 245 
 
-Obviously, we have a lot of data points to work with here. Let's begin by loading our libraries and reading in the data!
+Seems like we have a lot of data points to work with here. Let's begin by loading our libraries and reading in the data!
 
 ```{r}
 #| eval: true
@@ -95,7 +95,7 @@ corals_transformed <- corals %>%
 Let's take a look at the result of our well filtered data! This data cleaning will enable us to run effective and easy to understand data analysis in the next few steps. 
 
 ```{r}
-# Create a table using kable and format it with kableExtra
+# Create a table showing the head of our filtered dataframe
 kable(head(corals), format = "html", caption = "Preview of Filtered Global Coral Data") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
@@ -135,7 +135,7 @@ From this global map, we can see the huge volume to coral observations present i
 
 It could be interesting to, in the future, run the same analysis on each continent, and then cross-compare them. This would reveal interesting insights about different continents and species. Politically, it could also be an interesting view into how collecting bias might affect the results of such an analysis, since we can see that some continents contain more sample points than others. Unfortunately, this could be due to the fact that certain countries and regions are more studied than others, due to data collecting bias in the environmental sector.[1]
 
-For the purpose of this study, however, I will filter the coral data to the Philippines. The Philippines is an area known for its coral diversity and it's popularity in the diving community. I am curious to see how DEEP SEA corals are represented in the region, rather than the dive-able shallow coral systems. 
+For the purpose of this study, however, I will filter the coral data to the Philippines. The Philippines is an area known for its coral diversity and it's popularity in the diving community. I am curious to see how DEEP SEA corals are represented in the region, rather than the easily dive-able shallow coral systems. 
 
 
 ```{r}
@@ -153,29 +153,16 @@ phil_coral <- corals %>%
 phil_coral_transformed <- corals_transformed %>% 
   filter(country %in% "Philippines")
 
-```
-
-```{r}
-# Create a table using kable and format it with kableExtra
+# Create a table showing the head of our filtered dataframe
 kable(head(phil_coral), format = "html", caption = "Preview of Filtered Philippines Coral Data") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
-```{r}
+```{r, fig.width=14, fig.height=10}
 # Get data for base map of Philippines
 ph <- ne_countries(scale = 10, country = "Philippines", returnclass = "sf")
 
-luzon <- ph %>%
-  st_crop(
-    xmin = st_bbox(ph)$xmin %>% as.numeric(),
-    xmax = st_bbox(ph)$xmax %>% as.numeric(),
-    ymin = 13.5,
-    ymax = 18.5
-  ) %>%
-  st_transform(25391)
-```
-
-```{r, fig.width=14, fig.height=10}
+# Make a plot of corals in the Philippines
 tm_shape(ph) +
   tm_polygons(col = "name",
           palette = c("slategray", "snow3", "slategray2", "slategray3", "slategray4", "lightslategrey", "lightsteelblue4", "snow4"),
@@ -192,17 +179,21 @@ tm_shape(ph) +
   tm_layout(main.title = "Coral Observations \nin the Philippines",
             title.position = c("center", "top"),
             title.snap.to.legend = FALSE,
-            #frame = TRUE, 
-            #legend.frame = TRUE,
             legend.outside = TRUE)
 ```
 
-### Summarize
+### THE SUMMARIZATION:
 
-Data we are interested in.... make some plots
+As we can see from the map above, there have been deep sea coral collections happening all throughout the country of the Philippines. This gives me a lot of data to run analysis on. I decided to make some additional visualizations to summarize the contents of the data, and guide me toward making a null and alternate hypothesis. 
+
+First, I want to take a look at the distribution of coral observations along the different latitudes of the Philippines. In the data cleaning I performed above, I decided to create another column on the Philippines coral dataframe that rounded the latitudes to just two decimal places. This will allow me to work with latitiude data more easily, without having too many latitude points obscuring the visualizations of my data. I also added a column that summed the total number of coral observations at each of these rounded latitudes. This number will allow me to analyze the abundance of corals at each rounded latitude, enabling analysis of coral distributions. 
+
+It is using the rounded latitudes column(latitude_rounded), and the the observations per latitude column(obs_count) that I made the following data visualizations. 
+
+First up, I wanted to take an initial look at these two columns:
 
 ```{r}
-# Make a plot
+# Make a plot of coral obs and latitude
 ggplot() +
  geom_line(data = phil_coral,
             aes(x = latitude_rounded,
@@ -214,6 +205,10 @@ ggplot() +
        title = "Deep Sea Corals at Latitude") +
   theme_bw()
 ```
+
+This plot shows the general distribution of the corals along the different latitudes, and visualizes a significant spike in abundance around the 14 degrees latitude line.
+
+I wanted a way to visualize depth fluctuations along these latitude lines, in order to help visualize general depth patters in the area of interest. I decided to do another line graph, this one working almost like a cross section of depth along latitude, though of course only including depths available on our dataframe, so not actually having spatial representation, just data representation:
 
 ```{r}
 # Make a plot
@@ -230,6 +225,10 @@ ggplot() +
   theme_bw()
 ```
 
+This visualization showed some interesting spikes in depths collected from, with another large spike around the 14 degree mark, but several other degrees showing some spikes as well. This helps visualize the depths along latitudes that our corals dwell on, but I want to find a better way of visualizing how these depths might effect coral abundance.
+
+I decide to create scatterplots that incorporates all three variables, and see how these different visualizations can help me form my hypothesis.
+
 ```{r}
 ggplot() +
   geom_point(data = phil_coral,
@@ -240,10 +239,16 @@ ggplot() +
   labs(x = "Latitude",
        y = "Depth in Meters",
        title = "Colored by # of Observations") +
+    geom_smooth(data = phil_coral,
+              aes(x = latitude_rounded, y = depth_in_meters), 
+              method = "lm", se = FALSE, linewidth = 1.5, color = "seagreen") +
   theme_bw()
 
 ```
 
+This plot, with a geom_smooth line with method "lm", or linear model, shows us that as latitude increases, the depths that corals are found in decreases slightly. This visualization makes it difficult to interpret the number of corals observed, however, though it does show how there are more observations made at the 14 degree latitude. 
+
+I decide to try rearranging what variables go on what axes:
 
 ```{r}
 ggplot() +
@@ -255,22 +260,62 @@ ggplot() +
   labs(x = "Latitude",
        y = "Number of Deep Sea Corals Observed",
        title = "Depth, Latitude, and Observation Count") +
+    geom_smooth(data = phil_coral,
+              aes(x = latitude_rounded, y = obs_count), 
+              method = "lm", se = FALSE, linewidth = 1.5, color = "seagreen") +
   theme_bw()
 
 ```
 
+This plot shows me that as latitude increaases, the number of corals observed also increases. There is an outlier high up around latitude 14 degrees, and I suspect that that outlier is increasing the slope of our lm line by quite a bit. This plot makes it easy to observe the number of observations made, compared to the first plot. 
 
-### Hypothesize
-
-Null: There is no relationship Alternate: There IS a relationship
-
-## Analysis
-
-Method: Interactions model
 ```{r}
-max(phil_coral$depth_in_meters)
+ggplot() +
+  geom_point(data = phil_coral,
+             aes(x = depth_in_meters,
+                 y = obs_count,
+                 color = latitude)) +
+  scale_color_gradient(low = "skyblue", high = "black") +
+  labs(x = "Depth in Meters",
+       y = "Number of Deep Sea Corals Observed",
+       title = "Depth, Latitude, and Observation Count") +
+  geom_smooth(data = phil_coral,
+              aes(x = depth_in_meters, y = obs_count), 
+              method = "lm", se = FALSE, linewidth = 1.5, color = "seagreen") +
+  theme_bw()
 ```
 
+Finally, this plot shows us that as depth increases, the number of deep sea corals observed also decreases, with the colors of the points showing us the distribution of the points along latitude, with more observations occurring at higher latitudes. 
+
+All of these plots seem to show that there is some sort of relationship between all of these variables. Let's see if we can quantify that relationship!
+
+### THE HYPOTHESIS:
+
+**Null:** There is no relationship between number of deep sea corals observed, latitude, and depth in the Philippines.
+
+**Alternate:** There IS a relationship between number of deep sea corals observed, latitude, and depth in the Philippines.
+
+## THE ANALYSIS:
+
+### METHOD: 
+
+Since I have multiple variables to contend with, I decide on using an INTERACTIONS MODEL to understand the relationship between my variables (corals observed, latitude, and depth). My interactions model will take on this format:
+
+$$
+\text{number of deep sea corals observed} \sim \text{latitude} + \text{depth} + \text{latitude} \times \text{depth}
+$$
+
+Or, more technically:
+
+$$
+\text{coral observed} = \beta_0 + \beta_1 \cdot \text{latitude} + \beta_2 \cdot \text{depth} + \beta_3 \cdot (\text{latitude} \times \text{depth}) + \epsilon
+$$
+
+
+
+### IMPLEMENTATION:
+
+In R code, I will create this linear model and then run the summary:
 
 ```{r}
 # Create an interactions model
@@ -279,19 +324,19 @@ interactions <- lm(obs_count ~ latitude_rounded + depth_in_meters + latitude_rou
 summary(interactions)
 ```
 
-```{r}
-# Simple slopes of depth by latitude
-emtrends(interactions, specs = c("latitude_rounded"), var = "depth_in_meters")
-```
+### DIAGNOSTICS AND INTERPRETATION:
 
-```{r}
-# P-values of slopes of depth by latitude
-test(emtrends(interactions, specs = c("latitude_rounded"), var = "depth_in_meters"))
-```
+Looking at the p values on the far right of the summary chart, I can see that using latitude and depth together is significantly better than using depth alone to predict coral counts. 
 
-```{r}
-emmip(interactions, latitude_rounded ~ depth_in_meters, at=list(depth_in_meters=18:2050), CIs = FALSE)
-```
+The p-value of the F-statistic tells me that it is below our threshold of .05, meaning that the relationship between our variables is statistically significant and we can REJECT the null hypothesis. So, there IS a relationship between coral counts, depth, and latitude!
+
+However, our adjusted R squared tells me that that only 27.46% of the variation of coral counts is explained by depth and latitude. Since this isn't a very high percentage, I am lead to believe that there may be another variable in play that also effects coral counts. 
+
+If I were to take  this test further, I would explore the possibility of omitted variable bias.
+
+It is also important to consider how collecting practices might be influencing how and where corals are collected. I would also recommend further analysis of these variables, should I choose to continue this DEEP SEA CORALS analysis. 
+
+
 
 ## Citations
 
@@ -302,3 +347,6 @@ emmip(interactions, latitude_rounded ~ depth_in_meters, at=list(depth_in_meters=
 [3]Smithsonian Institution, National Museum of Natural History. Observation date range: 1860 to 2022. Coral or sponge occurrence observations submitted to the NOAA National Database for Deep Sea Corals and Sponges (www.deepseacoraldata.noaa.gov). DSCRTP Dataset ID: NMNH_IZ. Database version: 20241022-1.
 
 [4] IMAGE CREDITS: Woods Hole Oceanographic Institution. "Deep-sea Corals." Know Your Ocean. Accessed December 10, 2024. https://www.whoi.edu/know-your-ocean/ocean-topics/ocean-life/coral/deep-sea-corals/.
+
+## GITHUB REPOSITORY: 
+https://github.com/jorb1/coral-interactions
